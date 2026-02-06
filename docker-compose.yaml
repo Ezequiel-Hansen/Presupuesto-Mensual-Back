@@ -1,0 +1,42 @@
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      USERNAME_SQL: ${USERNAME_SQL}
+      PASS_SQL: ${PASS_SQL}
+      PORT_SQL: ${PORT_SQL}
+      DATABASE_SQL: ${DATABASE_SQL}
+      DATABASE_NAME: ${DATABASE_NAME}
+      QUERY_ALL: ${QUERY_ALL}
+      QUERY_CREATE: ${QUERY_CREATE}
+      QUERY_SET_DATE: ${QUERY_SET_DATE}
+      QUERY_GET_ID: ${QUERY_GET_ID}
+      QUERY_PATCH: ${QUERY_PATCH}
+      QUERY_DELETED: ${QUERY_DELETE}
+      QUERY_GET_MOUNT: ${QUERY_GET_MOUNT}
+    depends_on:
+      - db
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PASS_SQL}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: always
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command:
+      - "http"
+      - "app:4000"
+    depends_on:
+      - app
+
+volumes:
+  db_data:
